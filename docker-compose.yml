@@ -1,0 +1,39 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    container_name: postgres-simplimuv
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - ph-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest-simplimuv
+    environment:
+      - PORT=3003
+    ports:
+      - 3003:3003
+      - 9229:9229
+    tty: true
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+    command: npm run start:debug
+    env_file: .develop.env
+    networks:
+      - ph-net
+
+networks:
+  ph-net:
+    driver: bridge
